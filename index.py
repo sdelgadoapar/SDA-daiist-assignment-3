@@ -34,13 +34,13 @@ BOE_URL = "https://www.boe.es/buscar/act.php?id={id}"
 
 # The indexed corpus. `source` is the name used in citations and in eval/questions.csv.
 DOCUMENTS = {
-    "BOE-A-1994-26003": "LAU (Ley 29/1994 de Arrendamientos Urbanos)",
-    "BOE-A-2023-12203": "Ley 12/2023 por el derecho a la vivienda",
-    "BOE-A-2019-3108": "RDL 7/2019 de medidas urgentes en materia de vivienda y alquiler",
+    "BOE-A-1994-26003": "LAU (Ley 29/1994)",
+    "BOE-A-2023-12203": "Ley 12/2023 de vivienda",
+    "BOE-A-2019-3108": "RDL 7/2019",
 }
 # Known but NOT indexed by `main.py index`: added later through add_document (the before/after demo).
 EXTRA_DOCUMENTS = {
-    "BOE-A-1960-10906": "LPH (Ley 49/1960 de Propiedad Horizontal)",
+    "BOE-A-1960-10906": "LPH (Ley 49/1960)",
 }
 
 EMBED_MODEL = "gemini-embedding-2"
@@ -125,14 +125,24 @@ def parse_boe_xml(path: Path) -> list[dict]:
             # first paragraph is usually "Artículo 9. Plazo mínimo." -> keep as article title
             first = paras[0][1] if paras[0][0] == "articulo" else ""
         body = [t for c, t in paras if not (first and t == first)]
-        units.append({
-            "location": location,
-            "heading": " / ".join(v for v in (heading.get("titulo"), heading.get("capitulo")) if v),
-            "title": first,
-            "paragraphs": body,
-            "block_id": block.get("id", ""),
-        })
+        head = " / ".join(v for v in (heading.get("titulo"), heading.get("capitulo")) if v)
+        # Fix: BOE puts amendments that are not yet in force INSIDE the current text,
+        # after a "Téngase en cuenta que, con efectos de <date>, se modifica ..." line.
+        # Split them into their own unit, labelled with the date, so current and future
+        # rules are never mixed in one chunk.
+        future = next((i for i, t in enumerate(body) if FUTURE_RE.match(t)), None)
+        current_body, future_body = (body, []) if future is None else (body[:future], body[future:])
+        units.append({"location": location, "heading": head, "title": first,
+                      "paragraphs": current_body, "block_id": block.get("id", "")})
+        if future_body:
+            date = FUTURE_RE.match(future_body[0]).group(1)
+            label = f"{(first or location).rstrip('.')} [redacción futura, en vigor desde el {date}]"
+            units.append({"location": label, "heading": head, "title": label,
+                          "paragraphs": future_body, "block_id": block.get("id", "") + "-futura"})
     return units
+
+
+FUTURE_RE = re.compile(r"Téngase en cuenta que, con efectos de (\d{1,2} de \w+ de \d{4})")
 
 
 ARTICLE_RE = re.compile(r"^(Art[íi]culo\s+\d+(?:\s+(?:bis|ter|quater))?\.?|Disposici[óo]n\s+\w+\s+\w+\.?)", re.I)
@@ -289,8 +299,22 @@ def embed(texts: list[str], task: str = "RETRIEVAL_DOCUMENT") -> list[list[float
             raise
 
 
+QUERY_CACHE = INDEX_DIR / "query_cache.json"
+_query_cache: dict | None = None
+
+
 def embed_query(query: str) -> list[float]:
-    return embed([query], task="RETRIEVAL_QUERY")[0]
+    """Embed a search query, cached on disk: the same query never costs quota twice."""
+    import json
+    global _query_cache
+    if _query_cache is None:
+        _query_cache = json.loads(QUERY_CACHE.read_text()) if QUERY_CACHE.exists() else {}
+    key = f"{EMBED_MODEL}:{EMBED_DIM}:{query.strip()}"
+    if key not in _query_cache:
+        _query_cache[key] = embed([query], task="RETRIEVAL_QUERY")[0]
+        INDEX_DIR.mkdir(exist_ok=True)
+        QUERY_CACHE.write_text(json.dumps(_query_cache))
+    return _query_cache[key]
 
 
 def chroma():
