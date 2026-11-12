@@ -1,0 +1,66 @@
+{
+ "retrieval": [
+  {
+   "design": "articles",
+   "questions": 29,
+   "hit@1": 0.793,
+   "hit@3": 1.0,
+   "hit@5": 1.0,
+   "all_passages@1": 0.586,
+   "all_passages@3": 0.931,
+   "all_passages@5": 0.931,
+   "words_in_prompt@5": 1427
+  },
+  {
+   "design": "fixed200",
+   "questions": 29,
+   "hit@1": 0.759,
+   "hit@3": 0.897,
+   "hit@5": 1.0,
+   "all_passages@1": 0.552,
+   "all_passages@3": 0.793,
+   "all_passages@5": 0.862,
+   "words_in_prompt@5": 1074
+  }
+ ],
+ "agreement": {
+  "graded": 0
+ },
+ "failures": {
+  "not judged": [
+   "q01",
+   "q04",
+   "q05",
+   "q07",
+   "q08",
+   "q09",
+   "q10",
+   "q11",
+   "q12",
+   "q13",
+   "q14",
+   "q15",
+   "q16",
+   "q17",
+   "q18",
+   "q19",
+   "q20",
+   "q21",
+   "q22",
+   "q23",
+   "q24",
+   "q25",
+   "q26",
+   "q28",
+   "q29",
+   "q30",
+   "q31",
+   "q32",
+   "q33",
+   "q34",
+   "q35"
+  ]
+ },
+ "mean_tokens": 6272.085714285714,
+ "mean_seconds": 46.91428571428571
+}

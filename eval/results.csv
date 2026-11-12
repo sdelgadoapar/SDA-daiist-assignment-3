@@ -1,0 +1,36 @@
+id,kind,citations_ok,correct_refusal,wrong_refusal,answered_unanswerable,retrieved_expected,cited_expected,judge_correct,judge_supported,judge_reason,guard,tool_calls,tokens,seconds,suggested_failure
+q01,single,True,False,False,False,True,True,,,,ok,1,5098,65.4,not judged
+q02,single,True,False,False,False,True,True,1,1,The answer accurately reflects the reference and all statements are supported by Article 36.5 of the LAU in the evidence.,ok,1,5132,36.8,
+q03,single,True,False,False,False,True,True,1,1,The answer correctly identifies the 5-year minimum duration through mandatory annual extensions and is fully supported by the provided evidence from Article 9 of the LAU.,ok,1,4929,53.0,
+q04,single,True,False,False,False,True,True,,,,ok,1,4468,12.6,not judged
+q05,single,True,False,False,False,True,True,,,,ok,1,5193,51.4,not judged
+q06,single,True,False,False,False,True,True,1,1,"The answer correctly identifies the tenant as responsible for small repairs due to normal wear and tear, which is supported by Article 21.4 in the evidence.",ok,1,3954,19.5,
+q07,single,True,False,False,False,True,True,,,,ok,1,4223,44.8,not judged
+q08,single,True,False,False,False,True,True,,,,ok,1,4647,148.9,not judged
+q09,single,True,False,False,False,True,True,,,,ok,1,5348,48.9,not judged
+q10,single,True,False,False,False,True,True,,,,ok,1,4040,70.6,not judged
+q11,single,True,False,False,False,True,True,,,,ok,2,6701,151.2,not judged
+q12,single,True,False,False,False,True,True,,,,ok,1,4629,35.7,not judged
+q13,single,True,False,False,False,True,True,,,,ok,1,4147,61.5,not judged
+q14,single,True,False,False,False,True,True,,,,ok,2,5331,113.4,not judged
+q15,single,True,False,False,False,True,True,,,,ok,1,4114,20.8,not judged
+q16,single,True,False,False,False,True,True,,,,ok,1,4820,90.3,not judged
+q17,single,True,False,False,False,True,True,,,,ok,1,5375,55.2,not judged
+q18,single,True,False,False,False,True,True,,,,ok,1,5223,33.2,not judged
+q19,single,True,False,False,False,True,True,,,,ok,2,11679,112.3,not judged
+q20,single,True,False,True,False,True,False,,,,ok,1,5115,66.8,not judged
+q21,single,True,False,False,False,True,True,,,,ok,1,5177,5.0,not judged
+q22,single,True,False,False,False,True,True,,,,ok,1,3987,23.0,not judged
+q23,multi,True,False,False,False,True,True,,,,ok,2,11407,6.8,not judged
+q24,multi,True,False,False,False,True,True,,,,ok,2,12219,10.7,not judged
+q25,multi,True,False,False,False,True,True,,,,ok,2,10911,39.7,not judged
+q26,multi,True,False,False,False,True,True,,,,ok,1,5453,3.1,not judged
+q27,multi,True,False,False,False,True,True,1,1,The answer accurately addresses both parts of the question in full accordance with the reference and is completely supported by the provided text of Articles 14 and 25 of the LAU.,ok,1,5236,59.4,
+q28,multi,True,False,False,False,True,True,,,,ok,2,9556,6.2,not judged
+q29,multi,True,False,False,False,True,True,,,,ok,2,11416,77.4,not judged
+q30,unanswerable,True,True,False,False,,,,,,ok,1,5052,15.6,not judged
+q31,unanswerable,True,True,False,False,,,,,,ok,1,4573,31.9,not judged
+q32,unanswerable,True,True,False,False,,,,,,ok,2,9525,8.6,not judged
+q33,unanswerable,True,True,False,False,,,,,,ok,2,12154,38.6,not judged
+q34,unanswerable,True,False,False,True,,,,,,ok,1,4363,19.7,not judged
+q35,unanswerable,True,True,False,False,,,,,,ok,1,4328,4.0,not judged
