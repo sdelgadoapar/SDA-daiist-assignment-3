@@ -34,7 +34,7 @@ JUDGE = EVAL / "judge.jsonl"
 HUMAN = EVAL / "human_labels.csv"
 DEMO = EVAL / "add_document_demo.md"
 KS = (1, 3, 5)
-JUDGE_MODELS = [m for m in os.environ.get("JUDGE_MODELS", "gemini-3.8-flash,gemini-3.5-flash").split(",") if m]
+JUDGE_MODELS = [m for m in os.environ.get("JUDGE_MODELS", "gemini-3-flash-preview,gemini-3.8-flash").split(",") if m]
 DEMO_QUESTION_ID = "q34"           # "¿Puede la comunidad de propietarios prohibir los pisos turísticos…?"
 DEMO_DOC = "BOE-A-1960-10906"      # Ley de Propiedad Horizontal, not in the initial corpus
 
@@ -345,7 +345,7 @@ def summary(questions, retrieval_rows, answers, verdicts, agree) -> None:
     secs = sum(r["seconds"] for r in rows) / n
     lines = [
         "# Evaluation summary", "",
-        f"Agent model: `{os.environ.get('AGENT_MODEL', 'gemini-3.5-flash')}` · judge: `{', '.join(JUDGE_MODELS)}` (fallback order) · "
+        f"Agent model: `{os.environ.get("AGENT_MODEL", "gemini-3.5-flash-lite")}` · judge: `{', '.join(JUDGE_MODELS)}` (fallback order) · "
         f"embeddings: `{index.EMBED_MODEL}` ({index.EMBED_DIM} d) · design served: `{index.DEFAULT_DESIGN}`", "",
         "## Retrieval (answerable questions)", "",
         "| design | hit@1 | hit@3 | hit@5 | all passages@5 (multi) | words in prompt @5 |", "|---|---|---|---|---|---|",

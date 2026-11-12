@@ -37,7 +37,7 @@ from pydantic import create_model
 from api_key import load_api_key
 
 ROOT = Path(__file__).resolve().parent
-MODEL = os.environ.get("AGENT_MODEL", "gemini-3.5-flash")
+MODEL = os.environ.get("AGENT_MODEL", "gemini-3.5-flash-lite")
 MAX_TOOL_CALLS, MAX_MODEL_CALLS = 6, 8
 REFUSAL = "El corpus no cubre esta pregunta. / The corpus does not cover this question."
 
