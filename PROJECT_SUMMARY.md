@@ -127,7 +127,7 @@ Registered as `corpus` in `.mcp.json` and `.vscode/mcp.json`. It loads the commi
 - Transcript from Claude Code: `eval/subagent_transcript.md`.
 
 ### Harness (`agent.py`)
-- LangChain `create_agent` on **`gemini-3.5-flash`** (temperature 0). `gemini-2.5-flash` is no longer available to new keys.
+- LangChain `create_agent` on **`gemini-3.5-flash-lite`** (override with `AGENT_MODEL`). `gemini-2.5-flash` is no longer available to new keys. `gemini-3.5-flash` was tried first but its free tier allows only 20 requests a day, which ran out after 10 questions (those 10 answers are kept in `eval/answers_gemini-3.5-flash_first10.jsonl`). Flash-lite ignores `temperature=0` (fixed sampling), so re-runs can differ slightly.
 - Tools come from `server.py` over MCP stdio, and **`AGENTS.md` is the system prompt**.
 - Guardrails:
   1. **Approval before `add_document`.** A human must type "yes". With no terminal (evaluation, `check.py`), it is denied automatically.
@@ -160,7 +160,7 @@ Each stage saves its results and resumes where it stopped:
    - answered an unanswerable question
    - expected passage retrieved
    - expected passage cited
-4. **LLM judge** (`gemini-3.8-flash`, falling back to `gemini-3.5-flash`; a different model from the agent where possible). The rubric gives two binary scores and gets the retrieved text as evidence:
+4. **LLM judge** (`gemini-3-flash-preview`, falling back to `gemini-3.8-flash`; never the agent's model). The rubric gives two binary scores and gets the retrieved text as evidence:
    - *correct*: agrees with the reference with no contradicting claim, or a proper refusal for unanswerable questions;
    - *supported*: every legal claim appears in the evidence.
 
@@ -175,7 +175,37 @@ Failure categories: retrieval miss, wrong answer from the right passage, unsuppo
 
 ## 9. Results
 
-*(Filled in after `main.py evaluate`; see `eval/summary.md`.)*
+Full numbers: `eval/summary.md`. Run of 12 Nov 2026, agent `gemini-3.5-flash-lite`, 35 questions.
+
+**Retrieval** (articles design is served): hit@1 0.79 · hit@3 1.00 · hit@5 1.00 · all passages of multi questions in top 5: 0.93.
+
+**End to end (code checks, no LLM needed)**
+
+| metric | result |
+|---|---|
+| citations valid (every citation matches a retrieved passage) | 35/35 |
+| expected passage retrieved by the agent | 29/29 |
+| expected passage cited | 28/29 |
+| correct refusals on unanswerable questions | 5/6 |
+| wrong refusals on answerable questions | 1/29 (q20) |
+| citation guard retried / blocked | 0 / 0 |
+| searches per question (mean) | 1.3 |
+| tokens per question (mean) | 6,272 (≈5,990 input + 280 output) |
+| seconds per question | mean 46.9, median 38.6 (includes free-tier retries) |
+
+**Cost per question:** $0 on the free tier. On a paid tier it would be about 5,990 × input price + 280 × output price per question, plus one cached query embedding. Input dominates because AGENTS.md and 5 article-sized passages go into every call.
+
+**LLM judge:** only 4 of 35 answers could be judged (all 4 correct and supported) before both judge models hit their free daily quota. The judge stage resumes where it stopped, so run `uv run python evaluate.py` again on another day to finish it, then compute agreement once you have graded.
+
+**The two flagged failures (check them yourself):**
+- **q20 (future prórroga rules from 15 Nov 2026): wrong refusal.** The agent searched once, retrieved the future-text chunk of LAU art. 10 and still said the corpus "does not cover it in detail". It broke AGENTS.md rule 4 (search twice before refusing) and rule 5 (use future text, with its date). Likely category: *wrong answer from the right passage* (the model, not retrieval).
+- **q34 (can the building ban tourist flats?): bad test question.** It was labelled unanswerable, but RDL 7/2019 *Artículo segundo* amends LPH art. 17.12 (3/5 majority, not retroactive), and the agent answered correctly with a valid citation. The test set label was wrong (my draft). Either relabel q34 as single (RDL 7/2019, Artículo segundo) or replace it with a truly unanswerable question.
+
+**Add-document demo (`eval/add_document_demo.md`):** the LPH (54 chunks) was added through the same pipeline as `add_document`, and adding it a second time embedded 0 chunks (idempotent). *Before*, q34 was answered from the amending decree. *After*, it cites the law itself (LPH art. 17), adds the newer requirement for express community approval (LPH art. 7) and the transitional rule. So the answer got more complete and better sourced, rather than going from refusal to answer, because of the q34 label error above. If you replace q34 with a truly unanswerable question, choose one the LPH answers (e.g. who pays building works, or the majority needed to install a lift) and re-run the demo.
+
+**Subagent:** `eval/subagent_transcript.md`. It answered the rent-update question correctly with LAU art. 18, DA undécima and RDL 7/2019.
+
+**`check.py`:** all 4 checks pass (key, index + test set, server search, `main.py ask`). The only warning is that `eval/human_labels.csv` has no grades yet.
 
 ---
 
